@@ -126,6 +126,44 @@ if submitted:
             "Reversible defect": 7
         }[thal]
     }])
+st.set_page_config(
+# Website design and colors
+st.markdown("""
+<style>
+    .stApp {
+        background-color: #F0F8F8;
+        color: #102B46;
+    }
+
+    h1, h2, h3 {
+        color: #102B46 !important;
+        font-family: Arial, sans-serif;
+    }
+
+    .stButton > button,
+    .stFormSubmitButton > button {
+        background-color: #157C83;
+        color: white;
+        border-radius: 12px;
+        border: none;
+        font-weight: bold;
+        padding: 12px 20px;
+    }
+
+    .stButton > button:hover,
+    .stFormSubmitButton > button:hover {
+        background-color: #102B46;
+        color: white;
+    }
+
+    [data-testid="stForm"] {
+        background-color: white;
+        border-radius: 18px;
+        padding: 20px;
+        border: 1px solid #D8E8E8;
+    }
+</style>
+""", unsafe_allow_html=True)
 
     prediction = model.predict(patient)[0]
 
