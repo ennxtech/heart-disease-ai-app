@@ -126,7 +126,6 @@ if submitted:
             "Reversible defect": 7
         }[thal]
     }])
-st.set_page_config(
 # Website design and colors
 st.markdown("""
 <style>
