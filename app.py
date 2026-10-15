@@ -1,0 +1,182 @@
+import streamlit as st
+import pandas as pd
+import joblib
+from pathlib import Path
+
+st.set_page_config(page_title="SereneHeart AI | Heart Disease Classification", page_icon="❤️", layout="wide", initial_sidebar_state="expanded")
+
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+html, body, [class*="css"], [data-testid="stApp"] {font-family: 'DM Sans', sans-serif;}
+.stApp {background: #f4f8fb; color: #18354a;}
+[data-testid="stSidebar"] {background: #102b43;}
+[data-testid="stSidebar"] * {color: #f4fbff !important;}
+[data-testid="stSidebar"] [data-testid="stRadio"] label {padding: 0.5rem 0.2rem;}
+h1, h2, h3 {font-family: 'Outfit', sans-serif !important; color: #102b43 !important;}
+h1 {font-weight: 800 !important;}
+.hero {background: linear-gradient(115deg, #102b43 0%, #135b68 72%, #18877f 100%); padding: 3rem 2.8rem; border-radius: 22px; color: white; margin-bottom: 1.5rem; box-shadow: 0 12px 28px rgba(16,43,67,0.13);}
+.hero h1 {color: white !important; font-size: clamp(2.1rem, 4vw, 3.6rem) !important; margin: 0 0 .6rem;}
+.hero p {color: #d6eff1; font-size: 1.08rem; line-height: 1.7; max-width: 740px;}
+.eyebrow {font-size: .78rem; letter-spacing: .16em; font-weight: 700; color: #8fe7dc; text-transform: uppercase; margin-bottom: .8rem;}
+.feature-card {background: white; padding: 1.5rem; border-radius: 18px; border: 1px solid #e0eaf0; min-height: 170px; box-shadow: 0 4px 16px rgba(16,43,67,.035);}
+.feature-card h3 {font-size: 1.12rem; margin: .5rem 0;}
+.feature-card p {color: #567083; font-size: .94rem; line-height: 1.6;}
+.metric-card {background: white; padding: 1.4rem; border-radius: 17px; border: 1px solid #dfebef; border-top: 4px solid #169a93;}
+.metric-card .value {font-family: 'Outfit', sans-serif; color: #10364b; font-size: 2.2rem; font-weight: 800;}
+.metric-card .label {color: #567083; font-size: .92rem;}
+.section-intro {color: #567083; margin-top: -.3rem; margin-bottom: 1.3rem;}
+[data-testid="stForm"] {background: white; padding: 1.5rem; border: 1px solid #dce9ee; border-radius: 20px; box-shadow: 0 6px 22px rgba(16,43,67,.045);}
+.stButton > button[kind="primary"], [data-testid="stFormSubmitButton"] button {background: #117d7a !important; color: white !important; border: none !important; border-radius: 12px !important; font-weight: 700 !important; padding: .75rem 1.5rem !important;}
+.stButton > button[kind="primary"]:hover, [data-testid="stFormSubmitButton"] button:hover {background: #0e5966 !important;}
+.result-positive {background: #fff4e7; color: #794a15; border-left: 5px solid #e3a54b; padding: 1.4rem; border-radius: 14px;}
+.result-negative {background: #e9f7f3; color: #145b50; border-left: 5px solid #20a58b; padding: 1.4rem; border-radius: 14px;}
+.result-positive h3, .result-negative h3 {color: inherit !important; margin: 0 0 .5rem;}
+.footer {text-align: center; color: #6e8290; font-size: .83rem; margin-top: 3rem; padding-top: 1.3rem; border-top: 1px solid #dce7ed;}
+</style>
+""", unsafe_allow_html=True)
+
+FEATURES = ["age", "sex", "cp", "trestbps", "chol", "fbs", "restecg", "thalach", "exang", "oldpeak", "slope", "ca", "thal"]
+
+@st.cache_resource
+def load_model():
+    return joblib.load(Path(__file__).parent / "heart_disease_model.joblib")
+
+try:
+    model = load_model()
+except Exception as exc:
+    st.error("The saved model could not be loaded. Check that heart_disease_model.joblib is in the same GitHub folder as app.py and that requirements.txt specifies scikit-learn==1.6.1.")
+    with st.expander("Technical details"):
+        st.exception(exc)
+    st.stop()
+
+with st.sidebar:
+    st.markdown("## ❤️ SereneHeart AI")
+    st.caption("Heart Disease Classification")
+    st.divider()
+    page = st.radio("Explore", ["🏠 Home", "🩺 Assessment", "📊 Model Performance", "📖 About the Project"], label_visibility="collapsed", key="nav")
+    st.divider()
+    st.caption("Cleveland Heart Disease Dataset")
+    st.caption("Educational machine-learning demonstration — not a diagnostic service.")
+
+if page == "🏠 Home":
+    st.markdown("""
+    <div class="hero">
+      <div class="eyebrow">Machine learning • Heart health education</div>
+      <h1>Intelligent insights.<br>Thoughtful heart care.</h1>
+      <p>Explore how machine learning can classify heart disease presence using clinical measurements from the Cleveland Heart Disease dataset.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("### Welcome to SereneHeart AI")
+    st.markdown('<p class="section-intro">An interactive capstone project demonstrating data preprocessing, classification, model evaluation, and deployment.</p>', unsafe_allow_html=True)
+    a, b, c = st.columns(3)
+    with a:
+        st.markdown('<div class="feature-card"><div style="font-size:2rem">🩺</div><h3>Patient assessment</h3><p>Enter 13 clinical attributes and explore the classification generated by the trained model.</p></div>', unsafe_allow_html=True)
+    with b:
+        st.markdown('<div class="feature-card"><div style="font-size:2rem">📈</div><h3>Transparent performance</h3><p>Review recall, F2-score, MCC, and the confusion matrix from the held-out test set.</p></div>', unsafe_allow_html=True)
+    with c:
+        st.markdown('<div class="feature-card"><div style="font-size:2rem">🧠</div><h3>Explainable workflow</h3><p>Learn how the Cleveland dataset was prepared and how the model was selected.</p></div>', unsafe_allow_html=True)
+    st.write("")
+    def open_assessment():
+        st.session_state["nav"] = "🩺 Assessment"
+
+    st.button("Start an assessment →", type="primary", use_container_width=True, on_click=open_assessment)
+    st.info("This is an educational classification tool. It cannot diagnose heart disease or estimate future heart disease risk.")
+
+elif page == "🩺 Assessment":
+    st.title("🩺 Patient Assessment")
+    st.markdown('<p class="section-intro">Complete the 13 fields below to obtain a classification from the trained logistic regression pipeline.</p>', unsafe_allow_html=True)
+    with st.form("patient_form"):
+        st.markdown("#### Patient information")
+        col1, col2 = st.columns(2, gap="large")
+        with col1:
+            age = st.number_input("Age (years)", min_value=1, max_value=120, value=50)
+            sex = st.selectbox("Sex (dataset encoding)", ["Female", "Male"])
+            cp = st.selectbox("Chest pain type", ["Typical angina", "Atypical angina", "Non-anginal pain", "Asymptomatic"])
+            trestbps = st.number_input("Resting blood pressure (mm Hg)", min_value=50, max_value=250, value=120)
+            chol = st.number_input("Serum cholesterol (mg/dL)", min_value=50, max_value=700, value=200)
+            fbs = st.selectbox("Fasting blood sugar > 120 mg/dL", ["No", "Yes"])
+            restecg = st.selectbox("Resting ECG result", ["Normal", "ST-T abnormality", "Left ventricular hypertrophy"])
+        with col2:
+            thalach = st.number_input("Maximum heart rate achieved", min_value=40, max_value=250, value=150)
+            exang = st.selectbox("Exercise-induced angina", ["No", "Yes"])
+            oldpeak = st.number_input("ST depression (oldpeak)", min_value=0.0, max_value=10.0, value=1.0, step=0.1)
+            slope = st.selectbox("Slope of peak exercise ST segment", ["Upsloping", "Flat", "Downsloping"])
+            ca = st.selectbox("Number of major vessels (0–3)", [0, 1, 2, 3])
+            thal = st.selectbox("Thalassemia / thal test result", ["Normal", "Fixed defect", "Reversible defect"])
+        submitted = st.form_submit_button("Analyze patient information →", use_container_width=True)
+
+    if submitted:
+        patient = pd.DataFrame([{
+            "age": age,
+            "sex": 0 if sex == "Female" else 1,
+            "cp": ["Typical angina", "Atypical angina", "Non-anginal pain", "Asymptomatic"].index(cp) + 1,
+            "trestbps": trestbps,
+            "chol": chol,
+            "fbs": 0 if fbs == "No" else 1,
+            "restecg": ["Normal", "ST-T abnormality", "Left ventricular hypertrophy"].index(restecg),
+            "thalach": thalach,
+            "exang": 0 if exang == "No" else 1,
+            "oldpeak": oldpeak,
+            "slope": ["Upsloping", "Flat", "Downsloping"].index(slope) + 1,
+            "ca": ca,
+            "thal": {"Normal": 3, "Fixed defect": 6, "Reversible defect": 7}[thal],
+        }], columns=FEATURES)
+        try:
+            prediction = int(model.predict(patient)[0])
+            st.markdown("### Classification result")
+            if prediction == 1:
+                st.markdown('<div class="result-positive"><h3>⚠️ Heart disease presence classified</h3>The model classifies this record as showing heart disease presence, based on patterns learned from the Cleveland dataset.</div>', unsafe_allow_html=True)
+            else:
+                st.markdown('<div class="result-negative"><h3>✓ No heart disease presence classified</h3>The model classifies this record as showing no heart disease presence, based on patterns learned from the Cleveland dataset.</div>', unsafe_allow_html=True)
+            st.write("")
+            st.info("A classification is not a diagnosis. The model may be wrong and has not been validated for clinical use. Consult a qualified health professional for personal medical concerns.")
+            with st.expander("View encoded patient inputs"):
+                st.dataframe(patient.T.rename(columns={0: "Value"}), use_container_width=True)
+        except Exception as exc:
+            st.error("The prediction could not be completed. Please check the input values and model file.")
+            with st.expander("Technical details"):
+                st.exception(exc)
+
+elif page == "📊 Model Performance":
+    st.title("📊 Model Performance")
+    st.markdown('<p class="section-intro">Results for the selected tuned logistic regression model on a held-out test set of 61 records.</p>', unsafe_allow_html=True)
+    a, b, c = st.columns(3)
+    with a:
+        st.markdown('<div class="metric-card"><div class="value">92.9%</div><div class="label">Recall (positive class)</div></div>', unsafe_allow_html=True)
+    with b:
+        st.markdown('<div class="metric-card"><div class="value">0.903</div><div class="label">F2-score</div></div>', unsafe_allow_html=True)
+    with c:
+        st.markdown('<div class="metric-card"><div class="value">0.745</div><div class="label">Matthews correlation coefficient</div></div>', unsafe_allow_html=True)
+    st.write("")
+    st.subheader("Confusion matrix")
+    cm = pd.DataFrame([[27, 6], [2, 26]], index=["Actual: No disease", "Actual: Disease"], columns=["Predicted: No disease", "Predicted: Disease"])
+    st.dataframe(cm, use_container_width=True)
+    st.caption("27 true negatives · 6 false positives · 2 false negatives · 26 true positives. These results come from the project test set, not real-world clinical validation.")
+    st.subheader("Why these metrics?")
+    with st.expander("Recall — identifying positive cases", expanded=True):
+        st.write("Recall measures the proportion of actual positive cases that the model correctly identifies. The tuned model identified 26 of 28 positive cases in the test set.")
+    with st.expander("F2-score — giving recall more weight"):
+        st.write("The F2-score combines precision and recall while giving recall more importance. It was used as the main score when selecting tuned hyperparameters because missing positive cases was considered particularly important for this educational project.")
+    with st.expander("MCC — checking overall balance"):
+        st.write("The Matthews correlation coefficient uses all four outcomes in the confusion matrix. It helps check whether the classifier performs reasonably across both classes, rather than focusing only on positive cases.")
+    st.info("Scores are from one held-out test split of a small dataset. They do not establish clinical reliability.")
+
+else:
+    st.title("📖 About the Project")
+    st.markdown('<p class="section-intro">Heart Disease Classification Using Artificial Intelligence / Machine Learning</p>', unsafe_allow_html=True)
+    st.subheader("Project overview")
+    st.write("SereneHeart AI is a capstone demonstration of a machine-learning workflow using the UCI Cleveland Heart Disease dataset. The goal is to classify whether heart disease was recorded in the dataset, not to diagnose a person or forecast future disease.")
+    st.subheader("Dataset and preprocessing")
+    st.write("The dataset contains 303 records and 13 input features. The original target values were converted into a binary classification label: 0 for no recorded disease and 1 for recorded disease presence. Numerical features were imputed using the median and scaled; categorical features were imputed using the most frequent value and one-hot encoded.")
+    st.subheader("Model development")
+    st.write("Four model families were evaluated: logistic regression, random forest, gradient boosting, and a neural network. The training data was used for five-fold cross-validation and hyperparameter tuning. The selected deployment model is the tuned logistic regression pipeline, selected using F2-score.")
+    st.subheader("Why cross-validation?")
+    st.write("Five-fold cross-validation repeatedly trains and validates a model on different partitions of the training data. This provides a more informative view of training performance than relying on one validation split. The separate test set was reserved for final evaluation.")
+    st.subheader("Why a pipeline?")
+    st.write("A scikit-learn pipeline keeps data preprocessing and classification together. It applies the same transformations to new patient records as were used during training, helping prevent mismatches between the notebook and deployed app.")
+    st.subheader("Limitations")
+    st.write("The Cleveland dataset is small and historical, and the model has not been clinically validated. Predictions may be incorrect or may not generalize to other populations. This app is for learning and demonstration only.")
+    st.caption("Dataset: UCI Machine Learning Repository — Heart Disease (Cleveland).")
+
+st.markdown('<div class="footer">❤️ SereneHeart AI &nbsp;•&nbsp; Machine Learning Capstone Project &nbsp;•&nbsp; Educational use only</div>', unsafe_allow_html=True)
